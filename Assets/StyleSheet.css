@@ -1,0 +1,108 @@
+:root{
+    --fluent-main-background : rgb(28,28,28);
+    --fluent-secondary-background : rgb(42, 42, 42);
+    --fluent-tertiary-background : rgb(52,52,52);
+}
+
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    outline: none;
+    border: none;
+    resize: none;
+}
+
+body{
+    width: 100vw;
+    height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-image: url(FirstLogonBackground.png);
+}
+
+main{
+    width: 85vw;
+    height: 85vh;
+
+    border-radius: 10px;
+    background-color: var(--fluent-main-background);
+    padding: 3vw 2.5vw;
+
+    display: flex;
+    flex-direction: column;
+    gap : 16px
+}
+
+#forbidden_popup{
+    background-color: rgba(255, 219, 92, 0.75);
+    border-radius: 5px;
+    color: var(--fluent-main-background);
+    opacity: 0;
+
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1rem;
+    line-height: 3rem;
+
+    transition: opacity 1s;
+}
+
+#forbidden_popup > img{
+    height: 2.5rem;
+    filter: brightness(1.5);
+}
+
+#forbidden_popup > h2{
+    font-weight: 400;
+}
+
+#main_container{
+    flex-grow: 1;
+    display: flex;
+    gap: 60px;
+}
+
+#input_container{
+    flex-grow: 3;
+    display: flex;
+    flex-direction: column;
+}
+
+#output_container{
+    flex-grow: 2;
+    display: flex;
+    flex-direction: column;
+}
+
+.box_header{
+    padding-left: 16px;
+    background-color: var(--fluent-secondary-background);
+    line-height: 3rem;
+}
+
+.text_field{
+    flex-grow: 1;
+    background-color: var(--fluent-tertiary-background);
+    
+    font-size: 1rem;
+    line-height: 2rem;
+
+    padding: 16px;
+}
+
+#buttons_container{
+    margin-top: 16px;
+    display: flex;
+    gap: 16px;   
+}
+
+.spanner{
+    flex-grow: 1;
+}

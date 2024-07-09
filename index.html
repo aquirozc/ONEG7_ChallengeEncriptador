@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html lang="es-mx">
+    <head>
+        <title>Encriptador de Texto</title>
+        <meta name="author" content="Alejandro Quiroz Carmona">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="Assets/StyleSheet.css">
+        <link rel="stylesheet" href="Assets/SunValley.css">
+    </head>
+
+    <body>
+        <main>
+            <h1>Encriptador de Texto</h1>
+            <div id="forbidden_popup">
+                <img src="Assets/WarningSign.png" alt="Icono de Alerta">
+                <h2>No se admite el caracter [ ñ ]</h2>
+            </div>
+
+            <div id="main_container">
+                <div id="input_container">
+                    <div class="box_header">Texto Original</div>
+                    <textarea class="text_field"></textarea>
+                </div>
+                <div id="output_container">
+                    <div class="box_header">Texto Cifrado</div>
+                    <textarea class="text_field" disabled></textarea>
+                </div>
+            </div>
+
+            <div id="buttons_container">
+                <button id="open_btn">Abrir</button>
+                <button id="save_btn">Guardar</button>
+                <div class="spanner"></div>
+                <button id="undo_btn">Deshacer</button>
+            </div>
+        </main>
+    </body>
+
+    <script src="Scripts/Engine.js"></script>
+</html>

@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+*{
+    color: white;
+    font-family: 'Segoe UI','Open Sans', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+button, input[type="file"]{
+    color: white;
+    background-color: #0078D7;
+    border: 1px solid;
+    border-color: rgba(255, 255, 255, 0.08);
+    border-bottom-color: rgba(0, 0, 0, 0.6);
+    border-radius: 4px;
+    font-size: 15px;
+    padding: 6px 18px;
+    user-select: none;
+    overflow: hidden;
+}

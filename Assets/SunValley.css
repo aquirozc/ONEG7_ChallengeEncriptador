@@ -10,7 +10,7 @@ input::-webkit-inner-spin-button {
   -webkit-appearance: none;
 }
 
-button, input[type="file"]{
+button{
     color: white;
     background-color: #0078D7;
     border: 1px solid;
@@ -21,4 +21,13 @@ button, input[type="file"]{
     padding: 6px 18px;
     user-select: none;
     overflow: hidden;
+}
+
+.secondary-button{
+  background-color: rgb(54, 54, 54);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.secondary-button:active{
+  background-color: rgb(84,84,84);
 }

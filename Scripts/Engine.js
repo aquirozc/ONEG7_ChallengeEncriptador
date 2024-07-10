@@ -49,7 +49,11 @@ class MainController{
     displayPopup(){
         clearTimeout(this.timeout_id);
         this.forbidden_popup.style.opacity = 1;
-        this.timeout_id = setTimeout(() => this.forbidden_popup.style.opacity = 0, 2000);
+        this.timeout_id = setTimeout(() => {
+            this.forbidden_popup.style.opacity = 0;
+            this.popup_text.innerHTML = "";
+            }, 2000
+        );
     }
 
     getEncodedVowel(v){

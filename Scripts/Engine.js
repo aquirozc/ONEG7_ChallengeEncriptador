@@ -1,19 +1,21 @@
 class StringUtil{
 
-    static vowels_code = [97, 101, 105, 111, 117]
-
     static isUpperCase(str) {
         let c = str.charCodeAt(0);
-        return c >= 65 && c <= 90;
+        return (c >= 65 && c <= 90) || c == 209 || c == 199;
     }
 
     static isLowerCase(str) {
         let c = str.charCodeAt(0);
-        return c >= 97 && c <= 122;
+        return (c >= 97 && c <= 122) || c == 241 || c == 231;
     }
 
-    static isVowel(str){
-        return this.vowels_code.includes(str.charCodeAt(0));
+    static isUTF8(str){
+        return !(str.normalize("NFD").match(/[\u0300-\u036f]/g) == null);
+    }
+
+    static toASCII(str){
+        return str == "´" ? "" : str.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
     }
 
 }
@@ -46,14 +48,11 @@ class MainController{
        this.file.addEventListener('change', e => this.openFile(e));
     }
 
-    displayPopup(){
+    displayPopup(msg){
         clearTimeout(this.timeout_id);
+        this.popup_text.innerHTML = msg;
         this.forbidden_popup.style.opacity = 1;
-        this.timeout_id = setTimeout(() => {
-            this.forbidden_popup.style.opacity = 0;
-            this.popup_text.innerHTML = "";
-            }, 2000
-        );
+        this.timeout_id = setTimeout(() => this.forbidden_popup.style.opacity = 0, 2000);
     }
 
     getEncodedVowel(v){
@@ -69,7 +68,7 @@ class MainController{
 
     validateInput(e){
 
-        if(e.inputType == "insertText"){
+        if(e.inputType == "insertText" || e.inputType == "insertFromComposition"){
 
             let s = e.data;
 
@@ -80,26 +79,37 @@ class MainController{
 
             if(StringUtil.isUpperCase(s)){
                 e.target.value = e.target.value.toLowerCase();
-                this.popup_text.innerHTML = `No se admite caracteres en mayuscula. Se cambio automaticamente a minuscula`
-                this.displayPopup();
+                this.displayPopup(`No se admite caracteres en mayuscula. Se cambio automaticamente a minuscula`);
                 s = s.toLowerCase();
             }
 
             if(StringUtil.isLowerCase(s)){
+                this.output_tf.value += this.getEncodedVowel(s);
+                return;
+            }
 
-                if(StringUtil.isVowel(s)){
-                    s = this.getEncodedVowel(s);
-                }
-
-                this.output_tf.value += s;
+            if(StringUtil.isUTF8(s)){
+                let ss = StringUtil.toASCII(s)
+                e.target.value = e.target.value.replace(s,ss);
+                this.displayPopup("No se admiten caracteres en UTF-8");
+                s = ss;
+                this.output_tf.value += this.getEncodedVowel(s);
                 return;
             }
 
             e.target.value = e.target.value.replace(s,"")
-            this.popup_text.innerHTML = `No se admite el caracter [ ${s} ]`
-            this.displayPopup()
+            this.displayPopup(`No se admite el caracter [ ${s} ]`)
             return;
 
+        }
+
+        if (e.inputType == "insertCompositionText"){
+            e.target.value = e.target.value.replace("´","")
+            return;
+        }
+
+        if (e.inputType == "deleteCompositionText"){
+            return;
         }
 
         let isOk = true;
@@ -107,7 +117,10 @@ class MainController{
 
         for(let i = 0; i < chars.length;i++){
             if(!this.isValid(chars[i])){
-                chars[i] = ""
+                chars[i] = StringUtil.isUTF8(chars[i]) ? StringUtil.toASCII(chars[i]) : "";
+                isOk = false;
+            } else if(StringUtil.isUpperCase(chars[i])){
+                chars[i] = chars[i].toLowerCase();
                 isOk = false;
             }
         }
@@ -119,8 +132,7 @@ class MainController{
         this.output_tf.value = chars.join("");
 
         if (!isOk){
-            this.popup_text.innerHTML = `La entrada contenía caracteres no validos que fueron eliminados`;
-            this.displayPopup()
+            this.displayPopup(`La entrada contenía caracteres no validos que fueron eliminados`);
         }
 
     }

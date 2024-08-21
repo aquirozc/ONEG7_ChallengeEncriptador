@@ -41,6 +41,7 @@ class MainController{
        this.file.type = "file";
        this.file.accept = ".txt";
 
+       this.input_tf.addEventListener('keydown', e => this.validateReplace(e))
        this.input_tf.addEventListener('input', e => this.validateInput(e));
        this.open_btn.addEventListener('click', e => this.file.click());
        this.save_btn.addEventListener('click',e => this.saveFile());
@@ -71,6 +72,11 @@ class MainController{
         if(e.inputType == "insertText" || e.inputType == "insertFromComposition"){
 
             let s = e.data;
+
+            if(s.length > 1){
+                this.validateInput(this.dummy_event);
+                return;
+            }
 
             if(s == " "){
                 this.output_tf.value = this.output_tf.value + s;
@@ -105,7 +111,9 @@ class MainController{
 
         if (e.inputType == "insertCompositionText"){
             e.target.value = e.target.value.replace("´","")
-            return;
+            if(e.data.length == 1){
+                return;
+            }
         }
 
         if (e.inputType == "deleteCompositionText"){
@@ -160,6 +168,17 @@ class MainController{
         this.link.href = URL.createObjectURL(new Blob([this.output_tf.value], { type: "text/plain" }));
         this.link.download = "TextoEncriptado.txt";
         this.link.click();
+    }
+
+    validateReplace(e){
+        
+        if(e.key.startsWith("Arrow")){
+            return;
+        }
+
+        if(this.input_tf.selectionEnd - this.input_tf.selectionStart != 0){
+            e.preventDefault();
+        }
     }
     
 }

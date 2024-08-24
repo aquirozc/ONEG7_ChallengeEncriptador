@@ -22,31 +22,69 @@ class StringUtil{
 
 class MainController{
 
-    timeout_id = 0;
+    static UPPERCASE_WARNING = `No se admite caracteres en mayúscula. Se cambio automáticamente a minúscula.`;
+    static UTF8_WARNING = `No se admiten caracteres en UTF-8.`;
+    static GENERIC_WARNING = `La entrada contenía caracteres no validos que fueron eliminados.`;
+
+    isDecodeModeEnabled = false;
+
     link = document.createElement("a");
     file = document.createElement("input");
-    reader = new FileReader()
-    dummy_event = new Event("NO_TYPE");
-
-    input_tf = document.querySelector("#input_container .text_field");
-    output_tf = document.querySelector("#output_container .text_field");
+    reader = new FileReader();
+    dummy_event = new Event("DUMMY_EVENT");
 
     forbidden_popup = document.getElementById("forbidden_popup");
     popup_text = document.querySelector("#forbidden_popup h2");
 
+    main_cntr = document.querySelector("#main_container");
+    input_tf = document.querySelector("#input_container .text_field");
+    output_tf = document.querySelector("#output_container .text_field");
+
+    input_btn = document.querySelector("#input_btn");
+    output_btn = document.querySelector("#output_btn");
+    swap_btn = document.querySelector("#swipe-btn");
+
     open_btn = document.getElementById("open_btn");
     save_btn = document.getElementById("save_btn");
+    undo_btn = document.getElementById("undo_btn");
 
     constructor(){
-       this.file.type = "file";
-       this.file.accept = ".txt";
+        this.file.type = "file";
+        this.file.accept = ".txt";
 
-       this.input_tf.addEventListener('keydown', e => this.validateReplace(e))
-       this.input_tf.addEventListener('input', e => this.validateInput(e));
-       this.open_btn.addEventListener('click', e => this.file.click());
-       this.save_btn.addEventListener('click',e => this.saveFile());
+        this.swap_btn.addEventListener('click', e => this.changeWorkMode());
+        this.input_btn.addEventListener('click', e => this.handleInputBtnEvent());
+        this.output_btn.addEventListener('click', e => this.handleOutputBtnEvent());
 
-       this.file.addEventListener('change', e => this.openFile(e));
+        this.input_tf.addEventListener('input', e => this.encodeInput(e));
+        this.input_tf.addEventListener('keydown', e => this.validateReplace(e));
+
+        this.open_btn.addEventListener('click', e => this.file.click());
+        this.file.addEventListener('change', e => this.openFile(e));
+        this.save_btn.addEventListener('click', e => this.saveFile());
+    }
+
+    changeWorkMode(){
+
+        (this.isDecodeModeEnabled = !this.isDecodeModeEnabled) ? this.main_cntr.classList.add("reverse") : this.main_cntr.classList.remove("reverse");
+        [this.input_btn.innerHTML, this.output_btn.innerHTML] = [this.output_btn.innerHTML, this.input_btn.innerHTML]; 
+
+        this.input_tf.disabled = this.isDecodeModeEnabled;
+        this.output_tf.disabled = !this.isDecodeModeEnabled;
+
+    }
+
+    clearInputs(){
+        this.input_tf.value = "";
+        this.output_tf.value = "";
+    }
+
+    async clipboardCopy(tf){
+        await navigator.clipboard.writeText(tf.value);
+    }
+
+    async clipboardPaste(tf){
+        await navigator.clipboard.readText().then(text => tf.value = text);
     }
 
     displayPopup(msg){
@@ -56,36 +94,24 @@ class MainController{
         this.timeout_id = setTimeout(() => this.forbidden_popup.style.opacity = 0, 2000);
     }
 
-    getEncodedVowel(v){
-        switch (v){
-            case 'e': return 'enter';
-            case 'i': return 'imes';
-            case 'a': return 'ai';
-            case 'o': return 'ober';
-            case 'u': return 'ufat';
-            default : return v;
-        }
-    }
-
-    validateInput(e){
+    encodeInput(e){
 
         if(e.inputType == "insertText" || e.inputType == "insertFromComposition"){
 
             let s = e.data;
 
-            if(s.length > 1){
-                this.validateInput(this.dummy_event);
-                return;
+            if (s.length > 1){
+                this.encodeInput(this.dummy_event);
             }
 
             if(s == " "){
-                this.output_tf.value = this.output_tf.value + s;
+                this.output_tf.value += s;
                 return;
             }
 
             if(StringUtil.isUpperCase(s)){
+                this.displayPopup(MainController.UPPERCASE_WARNING);
                 e.target.value = e.target.value.toLowerCase();
-                this.displayPopup(`No se admite caracteres en mayuscula. Se cambio automaticamente a minuscula`);
                 s = s.toLowerCase();
             }
 
@@ -95,10 +121,9 @@ class MainController{
             }
 
             if(StringUtil.isUTF8(s)){
-                let ss = StringUtil.toASCII(s)
-                e.target.value = e.target.value.replace(s,ss);
-                this.displayPopup("No se admiten caracteres en UTF-8");
-                s = ss;
+                this.displayPopup(MainController.UTF8_WARNING);
+                s = StringUtil.toASCII(s)
+                e.target.value = e.target.value.replace(e.data,s);
                 this.output_tf.value += this.getEncodedVowel(s);
                 return;
             }
@@ -120,33 +145,50 @@ class MainController{
             return;
         }
 
-        let isOk = true;
+        let containsInfrigments = false;
         let chars = this.input_tf.value.split("");
+        this.input_tf.value = "";
+        this.output_tf.value = "";
 
-        for(let i = 0; i < chars.length;i++){
-            if(!this.isValid(chars[i])){
-                chars[i] = StringUtil.isUTF8(chars[i]) ? StringUtil.toASCII(chars[i]) : "";
-                isOk = false;
-            } else if(StringUtil.isUpperCase(chars[i])){
-                chars[i] = chars[i].toLowerCase();
-                isOk = false;
+        for (let s of chars){
+
+            if(!this.isValid(s)){
+                containsInfrigments = true;
+                s = StringUtil.isUTF8(s) ? StringUtil.toASCII(s) : (StringUtil.isUpperCase(s) ? s.toLowerCase() : "");
             }
+
+            this.input_tf.value += s;
+            this.output_tf.value += this.getEncodedVowel(s);
+
         }
 
-        chars.filter(c => c != "")
-        this.input_tf.value = chars.join("");
-
-        chars = chars.map(c => this.getEncodedVowel(c));
-        this.output_tf.value = chars.join("");
-
-        if (!isOk){
-            this.displayPopup(`La entrada contenía caracteres no validos que fueron eliminados`);
+        if(containsInfrigments){
+            this.displayPopup(MainController.GENERIC_WARNING);
         }
 
     }
 
+    getEncodedVowel(v){
+        switch (v){
+            case 'e': return 'enter';
+            case 'i': return 'imes';
+            case 'a': return 'ai';
+            case 'o': return 'ober';
+            case 'u': return 'ufat';
+            default : return v;
+        }
+    }
+
+    handleInputBtnEvent(){
+        this.isDecodeModeEnabled ? this.clipboardCopy(this.input_tf) : this.clipboardPaste(this.input_tf);
+    }
+
+    handleOutputBtnEvent(){
+        !this.isDecodeModeEnabled ? this.clipboardCopy(this.output_tf) : this.clipboardPaste(this.output_tf);
+    }
+
     isValid(str){
-        return str == " " || StringUtil.isLowerCase(str.toLowerCase());
+        return str == " " || StringUtil.isLowerCase(str);
     }
 
     openFile(e){
@@ -157,17 +199,29 @@ class MainController{
         }
 
         this.reader.onload = e => {
-            this.input_tf.value = e.target.result;
-            this.validateInput(this.dummy_event);
+            (!this.isDecodeModeEnabled ? this.input_tf : this.output_tf).value = e.target.result;
         };
 
         this.reader.readAsText(file);
     }
 
     saveFile(){
-        this.link.href = URL.createObjectURL(new Blob([this.output_tf.value], { type: "text/plain" }));
-        this.link.download = "TextoEncriptado.txt";
+
+        let file = ""
+        let tf = undefined;
+
+        if (this.isDecodeModeEnabled){
+            file = `TextoDesencriptado${Date.now()}.txt`
+            tf = this.input_tf;
+        }else{
+            file = `TextoEncriptado${Date.now()}.txt`
+            tf = this.output_tf;
+        }
+
+        this.link.href = URL.createObjectURL(new Blob([tf.value], { type: "text/plain" }));
+        this.link.download = file;
         this.link.click();
+
     }
 
     validateReplace(e){
@@ -180,10 +234,7 @@ class MainController{
             e.preventDefault();
         }
     }
-    
+
 }
-
-    
-
 
 new MainController();

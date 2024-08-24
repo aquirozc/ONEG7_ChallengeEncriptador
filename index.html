@@ -12,7 +12,16 @@
 
     <body>
         <main>
-            <h1>Encriptador de Texto</h1>
+            <header>
+                <div>
+                    <h1>Encriptador de Texto</h1>
+                    <h2>Por Alejandro Quiroz Carmona</h2>
+                </div>
+                <button id="swipe-btn" class="secondary-button">
+                    <img src="Assets/ic_fluent_arrow_repeat_all_24_filled.png" alt="Boton para cambiar de modo">
+                </button>
+            </header>
+
             <div id="forbidden_popup">
                 <img src="Assets/WarningSign.png" alt="Icono de Alerta">
                 <h2>No se admite el caracter [ ñ ]</h2>
@@ -22,24 +31,20 @@
                 <div id="input_container">
                     <div class="box_header">
                         <h3>Texto Original</h3>
-                        <button class="secondary-button">
+                        <button class="secondary-button" id="input_btn">
                             Pegar
-                            <img src="Assets/ic_fluent_clipboard_paste_24_filled.png" alt="">
+                            <img src="Assets/ic_fluent_clipboard_paste_24_filled.png" alt="Boton para pegar">
                         </button>
                     </div>
                     <textarea class="text_field"></textarea>
                 </div>
 
-                <button id="swipe-btn" class="secondary-button">
-                    <img src="Assets/ic_fluent_arrow_repeat_all_24_filled.png" alt="">
-                </button>
-
                 <div id="output_container">
                     <div class="box_header">
                         <h3>Texto Encriptado</h3>
-                        <button class="secondary-button">
+                        <button class="secondary-button" id="output_btn">
                             Copiar
-                            <img src="Assets/ic_fluent_copy_24_filled.png" alt="">
+                            <img src="Assets/ic_fluent_copy_24_filled.png" alt="Boton para copiar">
                         </button>
                     </div>
                     <textarea class="text_field" disabled></textarea>

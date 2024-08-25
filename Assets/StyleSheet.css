@@ -182,7 +182,6 @@ h2{
     }
 
     .reverse{
-        background-color: red;
         flex-direction: column-reverse !important;
     }
 }

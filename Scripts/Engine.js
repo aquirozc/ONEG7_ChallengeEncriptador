@@ -28,6 +28,9 @@ class MainController{
 
     isDecodeModeEnabled = false;
 
+    popup_timeoutid = 0;
+    cooldown_timeoutid = 0;
+
     link = document.createElement("a");
     file = document.createElement("input");
     reader = new FileReader();
@@ -59,6 +62,9 @@ class MainController{
         this.input_tf.addEventListener('input', e => this.encodeInput(e));
         this.input_tf.addEventListener('keydown', e => this.validateReplace(e));
 
+        this.output_tf.addEventListener('input',e => this.decodeInput(e));
+        this.output_tf_tf.addEventListener('keydown', e => this.validateReplace(e));
+
         this.open_btn.addEventListener('click', e => this.file.click());
         this.file.addEventListener('change', e => this.openFile(e));
         this.save_btn.addEventListener('click', e => this.saveFile());
@@ -87,11 +93,94 @@ class MainController{
         await navigator.clipboard.readText().then(text => tf.value = text);
     }
 
+    decodeInput(e){
+
+        this.input_tf.value = "..."
+        clearTimeout(this.cooldown_timeoutid);
+        
+        this.cooldown_timeoutid = setTimeout(() => {
+
+            let s = this.output_tf.value.replaceAll("ai","a")
+            s = s.replaceAll("enter","e");
+            s = s.replaceAll("imes","i");
+            s = s.replaceAll("ober", "o");
+            this.input_tf.value = s.replaceAll("ufat", "u")
+
+        }, 800);
+
+
+        if(e.inputType == "insertText" || e.inputType == "insertFromComposition"){
+
+            let s = e.data;
+
+            if (s.length > 1){
+                this.encodeInput(this.dummy_event);
+                return;
+            }
+
+            if(s == " "){
+                return;
+            }
+
+            if(StringUtil.isUpperCase(s)){
+                this.displayPopup(MainController.UPPERCASE_WARNING);
+                e.target.value = e.target.value.toLowerCase();
+                s = s.toLowerCase();
+            }
+
+            if(StringUtil.isLowerCase(s)){
+                return;
+            }
+
+            if(StringUtil.isUTF8(s)){
+                this.displayPopup(MainController.UTF8_WARNING);
+                e.target.value = e.target.value.replace(e.data,StringUtil.toASCII(s));
+                return;
+            }
+
+            e.target.value = e.target.value.replace(s,"")
+            this.displayPopup(`No se admite el caracter [ ${s} ]`)
+            return;
+
+        }
+
+        if (e.inputType == "insertCompositionText"){
+            e.target.value = e.target.value.replace("´","")
+            if(e.data.length == 1){
+                return;
+            }
+        }
+
+        if (e.inputType == "deleteCompositionText"){
+            return;
+        }
+
+        let containsInfrigments = false;
+        let chars = this.output_tf.value.split("");
+        this.output_tf.value = "";
+
+        for (let s of chars){
+
+            if(!this.isValid(s)){
+                containsInfrigments = true;
+                s = StringUtil.isUTF8(s) ? StringUtil.toASCII(s) : (StringUtil.isUpperCase(s) ? s.toLowerCase() : "");
+            }
+
+            this.output_tf.value += s;
+
+        }
+
+        if(containsInfrigments){
+            this.displayPopup(MainController.GENERIC_WARNING);
+        }
+
+    }
+
     displayPopup(msg){
-        clearTimeout(this.timeout_id);
+        clearTimeout(this.popup_timeoutid);
         this.popup_text.innerHTML = msg;
         this.forbidden_popup.style.opacity = 1;
-        this.timeout_id = setTimeout(() => this.forbidden_popup.style.opacity = 0, 2000);
+        this.popup_timeoutid = setTimeout(() => this.forbidden_popup.style.opacity = 0, 2000);
     }
 
     encodeInput(e){
@@ -102,6 +191,7 @@ class MainController{
 
             if (s.length > 1){
                 this.encodeInput(this.dummy_event);
+                return;
             }
 
             if(s == " "){
@@ -199,7 +289,15 @@ class MainController{
         }
 
         this.reader.onload = e => {
-            (!this.isDecodeModeEnabled ? this.input_tf : this.output_tf).value = e.target.result;
+
+            if(this.isDecodeModeEnabled){
+                this.output_tf.value = e.target.result;
+                this.decodeInput(this.dummy_event);
+            }else{
+                this.input_tf.value = e.target.result;
+                this.encodeInput(this.dummy_event);
+            }
+            
         };
 
         this.reader.readAsText(file);

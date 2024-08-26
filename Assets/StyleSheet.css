@@ -34,7 +34,8 @@ main{
 
     display: flex;
     flex-direction: column;
-    gap : 16px
+    gap : 16px;
+    position: relative;
 }
 
 header {
@@ -44,11 +45,11 @@ header {
 }
 
 h2{
-    font-weight: 100;
+    font-weight: lighter;
 }
 
 #forbidden_popup{
-    background-color: rgba(255, 219, 92, 0.75);
+    background-color: #341D1C;
     border-radius: 5px;
     color: var(--fluent-main-background);
     opacity: 0;
@@ -159,10 +160,11 @@ h2{
 
     #main_container{
         flex-direction: column;
+        height: auto;
     }
     
     #main_container > div{
-        height: auto;
+        height: 100%;
         width: 100%;
     }
 

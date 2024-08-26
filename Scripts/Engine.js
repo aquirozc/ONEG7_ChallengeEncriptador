@@ -63,11 +63,12 @@ class MainController{
         this.input_tf.addEventListener('keydown', e => this.validateReplace(e));
 
         this.output_tf.addEventListener('input',e => this.decodeInput(e));
-        this.output_tf_tf.addEventListener('keydown', e => this.validateReplace(e));
+        this.output_tf.addEventListener('keydown', e => this.validateReplace(e));
 
         this.open_btn.addEventListener('click', e => this.file.click());
         this.file.addEventListener('change', e => this.openFile(e));
         this.save_btn.addEventListener('click', e => this.saveFile());
+        this.undo_btn.addEventListener('click', e => this.clearInputs());
     }
 
     changeWorkMode(){
